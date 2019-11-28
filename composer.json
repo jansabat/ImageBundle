@@ -1,5 +1,5 @@
 {
-    "name": "gregwar/image-bundle",
+    "name": "jansabat/image-bundle",
     "type": "symfony-bundle",
     "description": "Image handling bundle",
     "keywords": ["symfony", "image"],
