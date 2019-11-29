@@ -2,7 +2,10 @@
 
 namespace Gregwar\ImageBundle\Extensions;
 
+use Gregwar\ImageBundle\ImageHandler;
 use Gregwar\ImageBundle\Services\ImageHandling;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
 /**
  * ImageTwig extension.
@@ -10,7 +13,7 @@ use Gregwar\ImageBundle\Services\ImageHandling;
  * @author Gregwar <g.passault@gmail.com>
  * @author bzikarsky <benjamin.zikarsky@perbility.de>
  */
-class ImageTwig extends \Twig_Extension
+class ImageTwig extends AbstractExtension
 {
     /**
      * @var ImageHandling
@@ -22,11 +25,7 @@ class ImageTwig extends \Twig_Extension
      */
     private $webDir;
 
-    /**
-     * @param ImageHandling $imageHandling
-     * @param string        $webDir
-     */
-    public function __construct(ImageHandling $imageHandling, $webDir)
+    public function __construct(ImageHandling $imageHandling, string $webDir)
     {
         $this->imageHandling = $imageHandling;
         $this->webDir = $webDir;
@@ -35,33 +34,28 @@ class ImageTwig extends \Twig_Extension
     /**
      * {@inheritdoc}
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
-        return array(
-            new \Twig_SimpleFunction('image', array($this, 'image'), array('is_safe' => array('html'))),
-            new \Twig_SimpleFunction('new_image', array($this, 'newImage'), array('is_safe' => array('html'))),
-            new \Twig_SimpleFunction('web_image', array($this, 'webImage'), array('is_safe' => array('html'))),
-        );
+        return [
+            new TwigFunction('image', [$this, 'image'], ['is_safe' => ['html']]),
+            new TwigFunction('new_image', [$this, 'newImage'], ['is_safe' => ['html']]),
+            new TwigFunction('web_image', [$this, 'webImage'], ['is_safe' => ['html']]),
+        ];
+    }
+
+    public function webImage(string $path): ImageHandler
+    {
+        $directory = sprintf('%s/%s', $this->webDir, $path);
+
+        return $this->imageHandling->open($directory);
     }
 
     /**
      * @param string $path
      *
-     * @return object
+     * @return ImageHandler
      */
-    public function webImage($path)
-    {
-        $directory = $this->webDir.'/';
-
-        return $this->imageHandling->open($directory.$path);
-    }
-
-    /**
-     * @param string $path
-     *
-     * @return object
-     */
-    public function image($path)
+    public function image(string $path): ImageHandler
     {
         return $this->imageHandling->open($path);
     }
@@ -70,9 +64,9 @@ class ImageTwig extends \Twig_Extension
      * @param string $width
      * @param string $height
      *
-     * @return object
+     * @return ImageHandler
      */
-    public function newImage($width, $height)
+    public function newImage(string $width, string $height): ImageHandler
     {
         return $this->imageHandling->create($width, $height);
     }
@@ -80,7 +74,7 @@ class ImageTwig extends \Twig_Extension
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getName(): string
     {
         return 'image';
     }
